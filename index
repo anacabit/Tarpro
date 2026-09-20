@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Tarjeta Pro v4</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f0f2f5;min-height:100vh}
+
+/* ── LOGIN ── */
+#loginScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%);z-index:9999;display:flex;align-items:center;justify-content:center}
+.login-box{background:rgba(255,255,255,0.07);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:36px 28px;width:310px;max-width:92vw;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.login-logo{font-size:34px;margin-bottom:6px}
+.login-title{font-size:19px;font-weight:800;color:#fff;margin-bottom:3px}
+.login-sub{font-size:11px;color:rgba(255,255,255,0.45);margin-bottom:28px;letter-spacing:.5px}
+.login-label{font-size:10px;color:rgba(255,255,255,0.55);font-weight:700;letter-spacing:.8px;text-transform:uppercase;display:block;margin-bottom:5px;text-align:left}
+.login-input{width:100%;padding:10px 13px;border-radius:9px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;font-size:13px;outline:none;margin-bottom:10px;transition:border-color .2s}
+.login-input:focus{border-color:#1a73e8}
+.login-input::placeholder{color:rgba(255,255,255,0.3)}
+.pass-wrap{position:relative}
+.pass-wrap .login-input{padding-right:38px}
+.eye-btn{position:absolute;right:11px;top:50%;transform:translateY(-60%);cursor:pointer;font-size:15px;opacity:.45;background:none;border:none;color:#fff}
+.login-err{font-size:11px;color:#ff6b6b;min-height:16px;margin-bottom:8px;font-weight:600}
+.login-btn{width:100%;padding:11px;background:linear-gradient(135deg,#1a73e8,#0d47a1);color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.3px;transition:opacity .15s;margin-bottom:14px}
+.login-btn:hover{opacity:.9}
+.login-attempts{font-size:10px;color:rgba(255,255,255,0.3)}
+.login-footer{margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);font-size:10px;color:rgba(255,255,255,0.25)}
+
+/* ── HEADER ── */
+.hdr{background:#1a1a2e;color:#fff;padding:10px 14px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.hdr-title{font-size:14px;font-weight:800}
+.hdr-title span{background:#1a73e8;border-radius:5px;padding:2px 7px;font-size:9px;font-weight:700;margin-left:5px}
+.mode-tabs{display:flex;gap:3px;margin-left:auto}
+.mode-tab{padding:5px 10px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1.5px solid rgba(255,255,255,.2);color:rgba(255,255,255,.5);background:transparent;transition:all .15s}
+.mode-tab.on{background:#1a73e8;color:#fff;border-color:#1a73e8}
+
+/* ── SHELL ── */
+.shell{display:grid;grid-template-columns:340px 1fr;min-height:calc(100vh - 44px)}
+.panel{background:#fff;border-right:1px solid #e0e0e0;overflow-y:auto;padding:12px}
+.stage{display:flex;flex-direction:column;align-items:center;padding:16px 10px;gap:12px;overflow-y:auto}
+
+
+
+/* ── PANEL FIELDS ── */
+.sec{margin-bottom:11px}
+.sec-title{font-size:9.5px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;padding-bottom:3px;border-bottom:1px solid #f0f0f0}
+.field{margin-bottom:6px}
+.field label{font-size:10.5px;color:#555;display:block;margin-bottom:2px;font-weight:500}
+.field input,.field select,.field textarea{width:100%;padding:5px 8px;border-radius:6px;border:1.5px solid #e8e8e8;font-size:11.5px;color:#222;background:#fafafa;transition:border-color .15s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#1a73e8;outline:none;background:#fff}
+.field textarea{resize:none;height:46px;line-height:1.4}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:3px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:3px}
+.pill{font-size:9.5px;padding:3px 7px;border-radius:20px;border:1.5px solid #e0e0e0;cursor:pointer;color:#666;background:#f8f8f8;transition:all .15s;text-align:center}
+.pill.on{background:#1a73e8;color:#fff;border-color:#1a73e8}
+
+/* ── PROF ── */
+.prof-tabs{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:6px}
+.prof-tab{font-size:10px;padding:5px;border-radius:7px;border:1.5px solid #e0e0e0;cursor:pointer;color:#666;background:#f8f8f8;text-align:center;transition:all .15s}
+.prof-tab.on{background:#1a73e8;color:#fff;border-color:#1a73e8}
+.prof-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;max-height:130px;overflow-y:auto}
+.prof-item{border-radius:6px;padding:5px 2px;text-align:center;cursor:pointer;border:1.5px solid #e8e8e8;background:#fafafa;transition:all .15s}
+.prof-item.on{border-color:#1a73e8;background:#e8f0fe}
+.pi-icon{font-size:15px}
+.pi-name{font-size:7px;color:#555;line-height:1.2}
+
+/* ── ICONOS ── */
+.icon-tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;margin-bottom:6px}
+.icon-tab{font-size:10px;padding:5px 3px;border-radius:7px;border:1.5px solid #e0e0e0;cursor:pointer;color:#666;background:#f8f8f8;text-align:center;transition:all .15s;line-height:1.3}
+.icon-tab.on{background:#0f9d58;color:#fff;border-color:#0f9d58}
+.icon-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;max-height:100px;overflow-y:auto}
+.icon-item{border-radius:6px;padding:4px 2px;text-align:center;cursor:pointer;border:1.5px solid #e8e8e8;background:#fafafa;font-size:16px;transition:all .15s}
+.icon-item.on{border-color:#0f9d58;background:#e8f5e9}
+
+/* ── FOTOS ── */
+.foto-block{background:#fff8f0;border-radius:9px;padding:9px;border:1.5px solid #ffe0b2;margin-bottom:6px}
+.foto-block-title{font-size:10px;font-weight:700;color:#f57c00;margin-bottom:6px;display:flex;align-items:center;gap:4px}
+.foto-opt-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:3px;margin-bottom:6px}
+.foto-opt{font-size:9px;padding:4px 2px;border-radius:6px;border:1.5px solid #e0e0e0;cursor:pointer;color:#666;background:#fff;text-align:center;transition:all .15s;line-height:1.3}
+.foto-opt.on{background:#f57c00;color:#fff;border-color:#f57c00}
+.drive-row{display:flex;gap:3px;margin-bottom:4px}
+.drive-row input{flex:1;font-size:10px;padding:4px 7px;border-radius:6px;border:1.5px solid #e0e0e0;background:#fff}
+.drive-row button{padding:4px 8px;border-radius:6px;border:none;background:#0f9d58;color:#fff;font-size:9px;font-weight:700;cursor:pointer;white-space:nowrap}
+.foto-preview-wrap{display:flex;gap:8px;justify-content:center;margin-top:6px}
+.foto-thumb{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2.5px solid #1a73e8;display:none}
+.foto-thumb-sq{width:52px;height:52px;border-radius:8px;object-fit:cover;border:2.5px solid #0f9d58;display:none}
+.foto-ph{width:52px;height:52px;border-radius:50%;background:#e8f0fe;border:2px dashed #1a73e8;display:flex;align-items:center;justify-content:center;font-size:9px;color:#1a73e8;text-align:center;cursor:pointer;flex-shrink:0}
+.logo-ph{width:52px;height:52px;border-radius:8px;background:#e8f5e9;border:2px dashed #0f9d58;display:flex;align-items:center;justify-content:center;font-size:9px;color:#0f9d58;text-align:center;cursor:pointer;flex-shrink:0}
+
+/* ── QR ── */
+.qr-pills{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px}
+.qr-pill{font-size:9.5px;padding:4px 2px;border-radius:7px;border:1.5px solid #e0e0e0;cursor:pointer;color:#666;background:#f8f8f8;text-align:center;transition:all .15s;line-height:1.3}
+.qr-pill.on{background:#1a73e8;color:#fff;border-color:#1a73e8}
+.qr-style-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-bottom:5px}
+.qr-style-item{border-radius:7px;padding:4px 2px;text-align:center;cursor:pointer;border:1.5px solid #e8e8e8;background:#fafafa;transition:all .15s}
+.qr-style-item.on{border-color:#1a73e8;background:#e8f0fe}
+.qr-style-lbl{font-size:7px;color:#555;margin-top:1px}
+.qr-colors{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-top:5px}
+.qr-colors label{font-size:9.5px;color:#888;display:block;margin-bottom:2px}
+.qr-colors input[type=color]{width:100%;height:26px;border-radius:5px;border:1px solid #e0e0e0;padding:1px;cursor:pointer}
+
+/* ── PALETA ── */
+.palette-cats{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:5px}
+.pcat{font-size:9px;padding:2px 7px;border-radius:20px;border:1px solid #e0e0e0;cursor:pointer;color:#888;background:#f8f8f8;transition:all .15s}
+.pcat.on{background:#1a73e8;color:#fff;border-color:#1a73e8}
+.palette-row{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:5px}
+.pal-sw{width:24px;height:24px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .15s;flex-shrink:0}
+.pal-sw.on{border-color:#1a73e8;transform:scale(1.18)}
+.color-picks{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:4px}
+.color-picks label{font-size:9.5px;color:#888;display:block;margin-bottom:2px}
+.color-picks input[type=color]{width:100%;height:26px;border-radius:5px;border:1px solid #e0e0e0;padding:1px;cursor:pointer}
+
+/* ── TOGGLE ── */
+.toggle-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:.5px solid #f0f0f0}
+.toggle-lbl{font-size:10.5px;color:#333;font-weight:500}
+.toggle{width:30px;height:17px;border-radius:20px;background:#e0e0e0;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.toggle.on{background:#1a73e8}
+.toggle::after{content:'';width:13px;height:13px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle.on::after{left:15px}
+
+/* ── BTNS ── */
+.btn{padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:none;transition:all .15s;width:100%}
+.btn-blue{background:#1a73e8;color:#fff}.btn-blue:hover{background:#1557b0}
+.btn-green{background:#0f9d58;color:#fff;margin-top:5px}.btn-green:hover{background:#0a7a42}
+.btn-red{background:#ea4335;color:#fff}.btn-red:hover{background:#c5221f}
+.btn-gray{background:#f0f2f5;color:#444;border:1px solid #e0e0e0}.btn-gray:hover{background:#e4e6ea}
+.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:5px}
+.btn-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:5px}
+
+/* ── STAGE ── */
+.stage-lbl{font-size:9.5px;font-weight:700;color:#bbb;letter-spacing:1px;text-transform:uppercase}
+.view{display:none}.view.show{display:flex;flex-direction:column;gap:12px;align-items:center}
+.dl-card{background:#fff;border-radius:12px;padding:12px;border:1px solid #e8e8e8;width:100%;max-width:340px}
+.dl-title{font-size:10px;font-weight:700;color:#333;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.dl-status{font-size:10px;color:#555;text-align:center;margin-top:6px;min-height:14px}
+
+/* ── TARJETA ── */
+.tarjeta{width:224px;min-height:394px;border-radius:20px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.22)}
+.card-body{flex:1;display:flex;flex-direction:column;padding:12px 11px 9px;gap:4px}
+.card-avatar{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2.5px solid rgba(255,255,255,.45);flex-shrink:0;overflow:hidden}
+.card-logo{width:44px;height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+.card-logo img{width:100%;height:100%;object-fit:contain;border-radius:6px}
+
+/* ── WEB PREVIEW ── */
+.web-preview{width:300px;border-radius:14px;overflow:hidden;box-shadow:0 10px 36px rgba(0,0,0,.18);background:#f9f9f9}
+.web-hero{padding:20px 14px 15px;text-align:center}
+.web-avatar{width:66px;height:66px;border-radius:50%;margin:0 auto 9px;display:flex;align-items:center;justify-content:center;font-size:24px;border:3px solid rgba(255,255,255,.5);overflow:hidden}
+.web-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.web-accent{height:4px;width:100%}
+.web-body{padding:10px}
+.web-sec{border-radius:9px;padding:9px;margin-bottom:7px}
+.web-sec-t{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;opacity:.65}
+.web-crow{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.web-icon{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.web-gallery{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:3px}
+.web-gal{border-radius:6px;height:44px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;overflow:hidden}
+.web-gal img{width:100%;height:100%;object-fit:cover;border-radius:6px}
+.web-svcs{display:grid;grid-template-columns:1fr 1fr;gap:3px}
+.web-svc{border-radius:5px;padding:4px 6px;font-size:9.5px;font-weight:700;text-align:center;color:#fff}
+.web-qr-row{display:flex;align-items:center;gap:9px;padding:7px;border-radius:9px;margin-bottom:7px}
+.web-footer{padding:7px 12px;text-align:center;font-size:8px;letter-spacing:.5px;opacity:.55}
+
+/* LOADING */
+.loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:5000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+.loading-overlay.show{display:flex}
+.loading-spinner{width:40px;height:40px;border:4px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{color:#fff;font-size:13px;font-weight:600}
+
+@media(max-width:700px){.shell{grid-template-columns:1fr}.panel{border-right:none;border-bottom:1px solid #e0e0e0}.web-preview{width:280px}}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text" id="loadingText">Generando imagen...</div>
+</div>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">🪪</div>
+    <div class="login-title">Mi Tarjeta Pro</div>
+    <div class="login-sub">Panel privado · Acceso restringido</div>
+    <label class="login-label">Usuario</label>
+    <input class="login-input" id="loginUser" type="text" placeholder="usuario" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
+    <label class="login-label">Contraseña</label>
+    <div class="pass-wrap">
+      <input class="login-input" id="loginPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="eye-btn" onclick="togglePass()">👁️</button>
+    </div>
+    <div class="login-err" id="loginErr"></div>
+    <button class="login-btn" onclick="doLogin()">Ingresar →</button>
+    <div class="login-attempts" id="loginAttempts"></div>
+    <div class="login-footer">Mi Tarjeta Pro · v4.0 · Uso privado</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appContent" style="display:none">
+
+<div class="hdr">
+  <div class="hdr-title">Mi Tarjeta Pro <span>v4</span></div>
+  <div class="mode-tabs">
+    <div class="mode-tab on" onclick="setMode('card',this)">🪪 Tarjeta</div>
+    <div class="mode-tab" onclick="setMode('web',this)">🌐 Web</div>
+    <div class="mode-tab" onclick="setMode('both',this)">⚡ Ambas</div>
+  </div>
+</div>
+
+<div class="shell">
+<div class="panel">
+
+  <!-- SHEETS -->
+  <div class="sec">
+    <div class="sec-title">📊 Pedidos de Google Sheets</div>
+    <div class="sheet-bar">
+      <div class="sheet-bar-title">🔗 Conectar tu Google Sheets</div>
+      <div class="sheet-input-row">
+        <input type="text" id="sheetId" placeholder="ID del Sheets (de la URL)">
+        <button onclick="()">Cargar</button>
+      </div>
+      <div class="sheet-input-row" style="margin-bottom:5px">
+        <input type="password" id="claveApp" placeholder="Clave secreta del script" style="font-family:monospace" value="LAqueES26$">
+      </div>
+      <div id=""><div class="sheet-status">Ingresa el ID y toca Cargar</div></div>
+    </div>
+  </div>
+
+  <!-- PROFESIÓN -->
+  <div class="sec">
+    <div class="sec-title">1. Profesión</div>
+    <div class="prof-tabs">
+      <div class="prof-tab on" id="ptLista" onclick="setProfMode('lista',this)">📋 De lista</div>
+      <div class="prof-tab" id="ptManual" onclick="setProfMode('manual',this)">✏️ Manual</div>
+    </div>
+    <div id="profListaBlock">
+      <div class="prof-grid" id="profGrid"></div>
+    </div>
+    <div id="profManualBlock" style="display:none">
+      <div class="field"><label>Nombre de profesión</label><input id="profManualN" placeholder="Ej: Sommelier, Coach..." oninput="renderAll()"></div>
+      <div class="field"><label>Subtítulo</label><input id="profManualS" placeholder="Ej: Vinos & Gastronomía" oninput="renderAll()"></div>
+    </div>
+  </div>
+
+  <!-- ÍCONO -->
+  <div class="sec">
+    <div class="sec-title">2. Ícono visual</div>
+    <div class="icon-tabs">
+      <div class="icon-tab on" id="iconTabEmoji" onclick="setIconMode('emoji',this)">😊 Emoji<br>librería</div>
+      <div class="icon-tab" id="iconTabCustom" onclick="setIconMode('custom',this)">🔤 Emoji<br>manual</div>
+      <div class="icon-tab" id="iconTabNone" onclick="setIconMode('none',this)">❌ Sin<br>ícono</div>
+    </div>
+    <div id="iconEmojiBlock"><div class="icon-grid" id="iconGrid"></div></div>
+    <div id="iconCustomBlock" style="display:none">
+      <div class="field"><label>Escribe cualquier emoji</label>
+        <input id="customEmoji" placeholder="🌿 🎸 🍕 💎..." oninput="renderAll()" style="font-size:18px;text-align:center">
+      </div>
+    </div>
+  </div>
+
+  <!-- FOTOS -->
+  <div class="sec">
+    <div class="sec-title">3. Foto y Logo del cliente</div>
+    <!-- FOTO -->
+    <div class="foto-block">
+      <div class="foto-block-title">📷 Foto profesional</div>
+      <div class="foto-opt-row">
+        <div class="foto-opt on" id="fotoOptDrive" onclick="setFotoMode('foto','drive',this)">📁 Drive</div>
+        <div class="foto-opt" id="fotoOptFile" onclick="setFotoMode('foto','file',this)">💻 PC</div>
+        <div class="foto-opt" id="fotoOptUrl" onclick="setFotoMode('foto','url',this)">🔗 URL</div>
+        <div class="foto-opt" id="fotoOptNone" onclick="setFotoMode('foto','none',this)">❌ Sin</div>
+      </div>
+      <div id="fotoBlockDrive">
+        <div class="drive-row">
+          <input type="text" id="driveLinkFoto" placeholder="Link Google Drive foto...">
+          <button onclick="cargarDrive('foto')">Cargar</button>
+        </div>
+      </div>
+      <div id="fotoBlockFile" style="display:none">
+        <input type="file" id="fileInputFoto" accept="image/*" onchange="cargarFile('foto',this)" style="font-size:10px;width:100%">
+      </div>
+      <div id="fotoBlockUrl" style="display:none">
+        <div class="drive-row">
+          <input type="text" id="urlFoto" placeholder="https://...">
+          <button onclick="cargarURL('foto')">Cargar</button>
+        </div>
+      </div>
+    </div>
+    <!-- LOGO -->
+    <div class="foto-block" style="border-color:#c8e6c9;background:#f1f8f1">
+      <div class="foto-block-title" style="color:#0f9d58">🏷️ Logo de empresa (opcional)</div>
+      <div class="foto-opt-row">
+        <div class="foto-opt on" id="logoOptDrive" onclick="setFotoMode('logo','drive',this)" style="border-color:#c8e6c9">📁 Drive</div>
+        <div class="foto-opt" id="logoOptFile" onclick="setFotoMode('logo','file',this)" style="border-color:#c8e6c9">💻 PC</div>
+        <div class="foto-opt" id="logoOptUrl" onclick="setFotoMode('logo','url',this)" style="border-color:#c8e6c9">🔗 URL</div>
+        <div class="foto-opt" id="logoOptNone" onclick="setFotoMode('logo','none',this)" style="border-color:#c8e6c9">❌ Sin</div>
+      </div>
+      <div id="logoBlockDrive">
+        <div class="drive-row">
+          <input type="text" id="driveLinkLogo" placeholder="Link Google Drive logo...">
+          <button onclick="cargarDrive('logo')" style="background:#0f9d58">Cargar</button>
+        </div>
+        <div style="font-size:9px;color:#888;margin-top:2px">PNG con fondo transparente ideal</div>
+      </div>
+      <div id="logoBlockFile" style="display:none">
+        <input type="file" id="fileInputLogo" accept="image/*" onchange="cargarFile('logo',this)" style="font-size:10px;width:100%">
+      </div>
+      <div id="logoBlockUrl" style="display:none">
+        <div class="drive-row">
+          <input type="text" id="urlLogo" placeholder="https://...">
+          <button onclick="cargarURL('logo')" style="background:#0f9d58">Cargar</button>
+        </div>
+      </div>
+    </div>
+    <!-- PREVIEWS -->
+    <div class="foto-preview-wrap">
+      <div style="text-align:center">
+        <img id="fotoPreview" class="foto-thumb" src="" alt="">
+        <div id="fotoPH" class="foto-ph" onclick="document.getElementById('fileInputFoto').click()">📷<br>Foto</div>
+        <div style="font-size:9px;color:#888;margin-top:3px">Foto</div>
+      </div>
+      <div style="text-align:center">
+        <img id="logoPreview" class="foto-thumb-sq" src="" alt="">
+        <div id="logoPH" class="logo-ph" onclick="document.getElementById('fileInputLogo').click()">🏷️<br>Logo</div>
+        <div style="font-size:9px;color:#888;margin-top:3px">Logo</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATOS -->
+  <div class="sec">
+    <div class="sec-title">4. Datos del cliente</div>
+    <div class="field"><label>Nombre completo</label><input id="fNombre" value="María González" oninput="renderAll()"></div>
+    <div class="field"><label>Empresa / Consultorio</label><input id="fEmpresa" value="Clínica Dental Pro" oninput="renderAll()"></div>
+    <div class="field"><label>Eslogan</label><input id="fEslogan" value="Tu sonrisa es mi arte" oninput="renderAll()"></div>
+    <div class="field"><label>Servicios (separados por coma)</label><input id="fSvcs" value="Limpieza,Blanqueamiento,Ortodoncia,Implantes" oninput="renderAll()"></div>
+  </div>
+
+  <!-- CONTACTO -->
+  <div class="sec">
+    <div class="sec-title">5. Contacto</div>
+    <div class="field"><label>WhatsApp</label><input id="fWa" value="+1 234 567 8900" oninput="renderAll()"></div>
+    <div class="field"><label>Email</label><input id="fEmail" value="hola@mipro.com" oninput="renderAll()"></div>
+    <div class="field"><label>Página web</label><input id="fWeb" value="www.mipro.com" oninput="renderAll()"></div>
+    <div class="field"><label>Instagram (opcional)</label><input id="fIg" value="@dra.maria" oninput="renderAll()"></div>
+    <div class="field"><label>Facebook (opcional)</label><input id="fFb" placeholder="facebook.com/tupagina" oninput="renderAll()"></div>
+    <div class="field"><label>TikTok (opcional)</label><input id="fTk" placeholder="@tuusuario" oninput="renderAll()"></div>
+  </div>
+
+  <!-- QR -->
+  <div class="sec">
+    <div class="sec-title">6. Código QR</div>
+    <div class="field"><label>Función al escanear</label>
+      <div class="qr-pills">
+        <div class="qr-pill" onclick="setQR('wa',this)">WhatsApp<br>mensaje</div>
+        <div class="qr-pill" onclick="setQR('perfil',this)">Perfil/<br>web</div>
+        <div class="qr-pill on" onclick="setQR('vcard',this)">Guardar<br>contacto</div>
+      </div>
+    </div>
+    <div class="field"><label id="qrLbl">Datos del contacto (vCard automático)</label>
+      <textarea id="fQrDato" oninput="renderAll()">Hola! Vi tu tarjeta y quisiera información.</textarea>
+    </div>
+    <div class="field"><label>Estilo visual del QR</label>
+      <div class="qr-style-grid" id="qrStyleGrid"></div>
+    </div>
+    <div class="field"><label>Colores del QR</label>
+      <div class="qr-colors">
+        <div><label>Módulos</label><input type="color" id="qrFg" value="#0077b6" oninput="renderAll()"></div>
+        <div><label>Fondo</label><input type="color" id="qrBg" value="#ffffff" oninput="renderAll()"></div>
+        <div><label>Ojos</label><input type="color" id="qrEye" value="#023e8a" oninput="renderAll()"></div>
+      </div>
+    </div>
+    <div class="field"><label>Posición en tarjeta</label><div class="g3" id="qrPosPills"></div></div>
+  </div>
+
+  <!-- COLORES -->
+  <div class="sec">
+    <div class="sec-title">7. Paleta de colores</div>
+    <div class="palette-cats" id="paletteCats"></div>
+    <div class="palette-row" id="paletteSwatches"></div>
+    <div class="color-picks">
+      <div><label>Color principal</label><input type="color" id="c1pick" value="#0077b6" oninput="S.c1=this.value;renderAll()"></div>
+      <div><label>Color acento</label><input type="color" id="c2pick" value="#90e0ef" oninput="S.c2=this.value;renderAll()"></div>
+    </div>
+    <div style="margin-top:7px">
+      <div style="font-size:9.5px;color:#888;margin-bottom:3px">Texto</div>
+      <div class="g2">
+        <div class="pill on" id="txtW" onclick="setTxt('white',this)">Blanco</div>
+        <div class="pill" id="txtD" onclick="setTxt('dark',this)">Oscuro</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DISEÑO -->
+  <div class="sec">
+    <div class="sec-title">8. Diseño de tarjeta</div>
+    <div class="field"><label>Fondo</label><div class="g3" id="bgStylePills"></div></div>
+    <div class="field"><label>Posición foto</label><div class="g3" id="fotoPills"></div></div>
+    <div class="field"><label>Tipografía</label><div class="g2" id="fontPills"></div></div>
+    <div class="field"><label>Marca de agua</label><div class="g3" id="wmPills"></div></div>
+  </div>
+
+  <!-- WEB -->
+  <div class="sec">
+    <div class="sec-title">9. Página web</div>
+    <div class="field"><label>Hero</label><div class="g3" id="heroStylePills"></div></div>
+    <div id="webSections"></div>
+  </div>
+
+  <!-- LIBRERÍA DRIVE -->
+  <div class="sec">
+    <div class="sec-title">📚 Librería Google Drive</div>
+    <div style="background:#f0f7ff;border-radius:9px;padding:9px;border:1.5px solid #c2d9f8;margin-bottom:6px">
+      <div style="font-size:10px;font-weight:700;color:#1a73e8;margin-bottom:6px">Iconos · Fondos · Frases desde tu Drive</div>
+      <div class="field" style="margin-bottom:5px">
+        <label style="font-size:10px;color:#555">Link carpeta de Drive</label>
+        <div class="drive-row">
+          <input type="text" id="driveFolderLink" placeholder="https://drive.google.com/drive/folders/...">
+          <button onclick="abrirDrive()" style="background:#1a73e8;color:#fff;border:none;padding:5px 8px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer">Abrir</button>
+        </div>
+      </div>
+      <div style="font-size:10px;font-weight:700;color:#1a73e8;margin-bottom:5px">Agregar desde Drive por tipo</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:6px">
+        <div style="background:#e8f0fe;border-radius:7px;padding:6px 4px;text-align:center;cursor:pointer;border:1.5px solid #c2d9f8" onclick="setLibraryType('icono')">
+          <div style="font-size:16px">😊</div>
+          <div style="font-size:8.5px;font-weight:700;color:#1a73e8;margin-top:2px">Ícono</div>
+        </div>
+        <div style="background:#fff8f0;border-radius:7px;padding:6px 4px;text-align:center;cursor:pointer;border:1.5px solid #ffe0b2" onclick="setLibraryType('fondo')">
+          <div style="font-size:16px">🖼️</div>
+          <div style="font-size:8.5px;font-weight:700;color:#f57c00;margin-top:2px">Fondo</div>
+        </div>
+        <div style="background:#f0f7f0;border-radius:7px;padding:6px 4px;text-align:center;cursor:pointer;border:1.5px solid #c8e6c9" onclick="setLibraryType('frase')">
+          <div style="font-size:16px">💬</div>
+          <div style="font-size:8.5px;font-weight:700;color:#0f9d58;margin-top:2px">Frase</div>
+        </div>
+      </div>
+      <!-- Input por tipo -->
+      <div id="libIconoBlock" style="display:none">
+        <div style="font-size:10px;color:#555;margin-bottom:4px">Link imagen del ícono (PNG transparente ideal)</div>
+        <div class="drive-row">
+          <input type="text" id="libIconoLink" placeholder="Link Drive del ícono...">
+          <button onclick="aplicarIconoDrive()" style="background:#1a73e8;color:#fff;border:none;padding:5px 8px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer">Aplicar</button>
+        </div>
+      </div>
+      <div id="libFondoBlock" style="display:none">
+        <div style="font-size:10px;color:#555;margin-bottom:4px">Link imagen del fondo degradado</div>
+        <div class="drive-row">
+          <input type="text" id="libFondoLink" placeholder="Link Drive del fondo...">
+          <button onclick="aplicarFondoDrive()" style="background:#f57c00;color:#fff;border:none;padding:5px 8px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer">Aplicar</button>
+        </div>
+      </div>
+      <div id="libFraseBlock" style="display:none">
+        <div style="font-size:10px;color:#555;margin-bottom:4px">Escribe o pega la frase del cliente</div>
+        <input type="text" id="libFraseTexto" placeholder="Ej: Tu sonrisa es mi arte..." style="width:100%;padding:5px 8px;border-radius:6px;border:1.5px solid #c8e6c9;font-size:11px;margin-bottom:4px" oninput="aplicarFrase()">
+        <div style="font-size:9px;color:#888">Se aplica como eslogan en la tarjeta</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FONDO IMAGEN -->
+  <div class="sec">
+    <div class="sec-title">🖼️ Fondo con imagen</div>
+    <div style="background:#fff8f0;border-radius:9px;padding:9px;border:1.5px solid #ffe0b2;margin-bottom:6px">
+      <div id="gradientGallery" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:6px"></div>
+      <div style="font-size:10px;font-weight:700;color:#f57c00;margin-bottom:6px">Sube tu fondo degradado</div>
+      <div class="foto-opt-row">
+        <div class="foto-opt on" id="bgImgOptNone" onclick="setBgImg('none',this)">❌ Sin<br>imagen</div>
+        <div class="foto-opt" id="bgImgOptFile" onclick="setBgImg('file',this)">💻 Subir<br>desde PC</div>
+        <div class="foto-opt" id="bgImgOptDrive" onclick="setBgImg('drive',this)">📁 Drive<br>link</div>
+        <div class="foto-opt" id="bgImgOptUrl" onclick="setBgImg('url',this)">🔗 URL<br>imagen</div>
+      </div>
+      <div id="bgImgBlockFile" style="display:none;margin-top:5px">
+        <input type="file" id="fileInputBg" accept="image/*" onchange="cargarBgFile(this)" style="font-size:10px;width:100%">
+      </div>
+      <div id="bgImgBlockDrive" style="display:none;margin-top:5px">
+        <div class="drive-row">
+          <input type="text" id="driveLinkBg" placeholder="Link Google Drive fondo...">
+          <button onclick="cargarBgDrive()">Cargar</button>
+        </div>
+      </div>
+      <div id="bgImgBlockUrl" style="display:none;margin-top:5px">
+        <div class="drive-row">
+          <input type="text" id="urlBg" placeholder="https://imagen.com/degradado.jpg">
+          <button onclick="cargarBgUrl()">Cargar</button>
+        </div>
+      </div>
+      <div id="bgImgPreviewWrap" style="display:none;margin-top:6px;text-align:center">
+        <img id="bgImgPreview" style="width:100%;height:60px;object-fit:cover;border-radius:8px;border:1.5px solid #e0e0e0">
+        <div style="font-size:9px;color:#888;margin-top:2px">Fondo seleccionado</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn btn-blue" onclick="renderAll()">Actualizar</button>
+  <button class="btn btn-gray" style="margin-top:5px" onclick="aleatorio()">Diseño aleatorio</button>
+</div>
+
+<!-- STAGE -->
+<div class="stage">
+
+  <!-- TARJETA -->
+  <div class="view show" id="viewCard">
+    <div class="stage-lbl">tarjeta digital</div>
+    <div id="cardWrap">
+      <div class="tarjeta" id="card"></div>
+    </div>
+    <div class="dl-card">
+      <div class="dl-title">Descargar y entregar</div>
+      <div style="background:#e8f5e9;border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:10px;color:#1b5e20;line-height:1.8">
+        <b>$5</b> — Tarjeta PNG con QR vCard integrado<br>
+        <b>$7</b> — Tarjeta PNG + QR separado para imprimir<br>
+        <b>$12</b> — Tarjeta + QR + Página web completa
+      </div>
+      <button class="btn btn-blue" onclick="descargarTarjeta()">📥 Tarjeta PNG — $5</button>
+      <button class="btn btn-green" onclick="descargarQRSeparado()">🔳 Tarjeta + QR separado — $7</button>
+      <div class="btn-row">
+        <button class="btn btn-gray" onclick="enviarWA()">💬 Avisar WhatsApp</button>
+        <button class="btn btn-gray" onclick="copiarQRLink()">🔗 Copiar link QR</button>
+      </div>
+      <div class="dl-status" id="st1"></div>
+    </div>
+  </div>
+
+  <!-- WEB -->
+  <div class="view" id="viewWeb">
+    <div class="stage-lbl">mini página web</div>
+    <div class="web-preview" id="webPreview"></div>
+    <div class="dl-card">
+      <div class="dl-title">Entregar página web</div>
+      <button class="btn btn-blue" onclick="descargarHTML()">📥 Página web HTML — incluida en $12</button>
+      <button class="btn btn-green" onclick="instruccionesSites()">📖 Cómo subir a Google Sites</button>
+      <div class="dl-status" id="st2"></div>
+    </div>
+  </div>
+
+  <!-- AMBAS -->
+  <div class="view" id="viewBoth">
+    <div class="stage-lbl">tarjeta + página web</div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;align-items:flex-start">
+      <div>
+        <div style="font-size:8.5px;font-weight:700;color:#bbb;text-align:center;margin-bottom:4px;letter-spacing:.8px">TARJETA</div>
+        <div id="cardWrap2"><div class="tarjeta" id="card2" style="width:188px;min-height:332px"></div></div>
+      </div>
+      <div>
+        <div style="font-size:8.5px;font-weight:700;color:#bbb;text-align:center;margin-bottom:4px;letter-spacing:.8px">PÁGINA WEB</div>
+        <div class="web-preview" id="webPreview2" style="width:230px"></div>
+      </div>
+    </div>
+    <div class="dl-card" style="max-width:440px">
+      <div class="dl-title">Entregar al cliente</div>
+      <div class="btn-row">
+        <button class="btn btn-blue" onclick="descargarTarjeta()">📥 Tarjeta PNG</button>
+        <button class="btn btn-green" onclick="descargarHTML()">📥 Página web</button>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-gray" onclick="descargarQR()">🔳 QR separado</button>
+        <button class="btn btn-gray" onclick="enviarWA()">💬 WhatsApp</button>
+      </div>
+      <div class="dl-status" id="st3"></div>
+    </div>
+  </div>
+
+</div>
+</div>
+</div><!-- end appContent -->
+
+<script>
+/* ══ LOGIN ══ */
+const USERS=[{user:"admin",pass:"LAqueES26$"},{user:"mitarjeta",pass:"LAqueES26$"}];
+let loginTries=0,lockUntil=0;
+
+function doLogin(){
+  const now=Date.now();
+  if(now<lockUntil){document.getElementById("loginErr").textContent=`Bloqueado. Espera ${Math.ceil((lockUntil-now)/1000)}s`;return;}
+  const u=document.getElementById("loginUser").value.trim().toLowerCase();
+  const p=document.getElementById("loginPass").value;
+  if(USERS.find(x=>x.user===u&&x.pass===p)){
+    loginTries=0;
+    const ls=document.getElementById("loginScreen");
+    ls.style.transition="opacity .4s";ls.style.opacity="0";
+    setTimeout(()=>{ls.style.display="none";document.getElementById("appContent").style.display="block";renderAll();},400);
+  } else {
+    loginTries++;
+    if(loginTries>=3){
+      lockUntil=Date.now()+30000;
+      const iv=setInterval(()=>{const s=Math.ceil((lockUntil-Date.now())/1000);if(s<=0){clearInterval(iv);document.getElementById("loginErr").textContent="Puedes intentar de nuevo.";loginTries=0;}else document.getElementById("loginErr").textContent=`Bloqueado ${s}s`;},1000);
+    } else {
+      document.getElementById("loginErr").textContent=`Incorrecto (intento ${loginTries}/3)`;
+      document.getElementById("loginPass").value="";
+      document.getElementById("loginPass").focus();
+      document.getElementById("loginAttempts").textContent=`Intentos restantes: ${3-loginTries}`;
+    }
+  }
+}
+function togglePass(){const p=document.getElementById("loginPass");p.type=p.type==="password"?"text":"password";}
+
+/* ══ GOOGLE SHEETS ══ */
+
+
+function cargarPedido(c,cols){
+  // Map columns A-AE (0-30)
+  const v=(i)=>c[i]&&c[i].v?String(c[i].v):"";
+  // Columnas según tu form: A=tiempo B=nombre C=profesion D=empresa E=eslogan
+  // F=WA G=tel H=email I=web J=ciudad K=dir L=IG M=FB N=LI O=TK
+  // P=color Q=estilo R=foto S=QR T=msgQR U=fotoLink V=logoLink W=galeriaLinks
+  // X=quiereweb Y=desc Z=servicios AA=comentarios AB=estado AC=pago AD=link AE=notas
+  document.getElementById("fNombre").value=v(1);
+  document.getElementById("fEmpresa").value=v(3);
+  document.getElementById("fEslogan").value=v(4);
+  document.getElementById("fWa").value=v(5);
+  document.getElementById("fEmail").value=v(7);
+  document.getElementById("fWeb").value=v(8);
+  document.getElementById("fIg").value=v(11);
+  document.getElementById("fDesc").value=v(24)||"";
+  document.getElementById("fSvcs").value=v(25)||"";
+  document.getElementById("fQrDato").value=v(19)||"Hola! Vi tu tarjeta y quisiera información.";
+
+  // Profesión
+  const profVal=v(2);
+  if(profVal){
+    document.getElementById("fNombre").dispatchEvent(new Event("input"));
+    // try to match emoji profession
+    const idx=PROFS.findIndex(p=>profVal.includes(p.n)||p.n.includes(profVal.split(" ")[0]));
+    if(idx>=0){
+      S.profIdx=idx;S.iconEmoji=PROFS[idx].e;
+      document.querySelectorAll(".prof-item").forEach((el,j)=>el.classList.toggle("on",j===idx));
+    } else {
+      // switch to manual
+      setProfMode("manual",document.getElementById("ptManual"));
+      document.getElementById("profManualN").value=profVal;
+      document.getElementById("profManualS").value=v(2);
+    }
+  }
+
+  // Foto desde Drive
+  const fotoLink=v(20);
+  if(fotoLink){
+    document.getElementById("driveLinkFoto").value=fotoLink;
+    cargarDrive("foto");
+  }
+  const logoLink=v(21);
+  if(logoLink){
+    document.getElementById("driveLinkLogo").value=logoLink;
+    cargarDrive("logo");
+  }
+
+  // Color preferido — auto match palette
+  const colorPref=v(15).toLowerCase();
+  if(colorPref.includes("azul")){S.paletteCat="Azules";}
+  else if(colorPref.includes("verde")){S.paletteCat="Verdes";}
+  else if(colorPref.includes("rosa")||colorPref.includes("rojo")){S.paletteCat="Rojos & Rosas";}
+  else if(colorPref.includes("morado")){S.paletteCat="Morados";}
+  else if(colorPref.includes("negro")||colorPref.includes("oscuro")){S.paletteCat="Oscuros";}
+  buildPaletteCats();buildPaletteSwatches();
+
+  renderAll();
+  status("st1","✅ Datos del cliente cargados");
+  status("st3","✅ Datos del cliente cargados");
+}
+
+/* ══ DATOS ══ */
+const PROFS=[
+  {n:"Odontóloga",s:"Salud Dental",e:"🦷"},
+  {n:"Abogado",s:"Derecho & Justicia",e:"⚖️"},
+  {n:"Médico",s:"Medicina General",e:"🩺"},
+  {n:"Chef",s:"Alta Gastronomía",e:"👨‍🍳"},
+  {n:"Fotógrafo",s:"Fotografía Pro",e:"📸"},
+  {n:"Psicóloga",s:"Psicología Clínica",e:"🧠"},
+  {n:"Arquitecto",s:"Diseño & Construcción",e:"🏛️"},
+  {n:"Nutricionista",s:"Nutrición & Bienestar",e:"🥗"},
+  {n:"Peluquero",s:"Estilismo & Belleza",e:"✂️"},
+  {n:"Ingeniero",s:"Ingeniería & Tech",e:"⚙️"},
+  {n:"Veterinario",s:"Salud Animal",e:"🐾"},
+  {n:"Profesor",s:"Educación",e:"📚"},
+  {n:"Farmacéutico",s:"Farmacia & Salud",e:"💊"},
+  {n:"Maquillista",s:"Makeup & Estética",e:"💄"},
+  {n:"Inmobiliario",s:"Bienes Raíces",e:"🏠"},
+  {n:"DJ / Músico",s:"Música & Eventos",e:"🎵"},
+  {n:"Entrenador",s:"Fitness & Salud",e:"💪"},
+  {n:"Diseñador",s:"Diseño Gráfico",e:"🎨"},
+  {n:"Contador",s:"Contabilidad",e:"📊"},
+  {n:"Fisioterapeuta",s:"Rehabilitación",e:"🩻"},
+  {n:"Enfermero/a",s:"Enfermería",e:"💉"},
+  {n:"Coach",s:"Coaching & Desarrollo",e:"🎯"},
+  {n:"Terapeuta",s:"Terapias Alternativas",e:"🌸"},
+  {n:"Masajista",s:"Masajes & Terapias",e:"🤲"},
+  {n:"Esteticista",s:"Estética & Belleza",e:"💅"},
+  {n:"Tatuador",s:"Arte en Piel",e:"🖊️"},
+  {n:"Mecánico",s:"Mecánica Automotriz",e:"🚗"},
+  {n:"Electricista",s:"Electricidad",e:"⚡"},
+  {n:"Jardinero",s:"Jardinería",e:"🌿"},
+  {n:"Delivery",s:"Servicio de Entrega",e:"🛵"},
+  {n:"Sommelier",s:"Vinos & Gastronomía",e:"🍷"},
+  {n:"Periodista",s:"Medios & Comunicación",e:"📰"},
+  {n:"Traductor",s:"Idiomas & Traducción",e:"🌐"},
+];
+
+const EMOJIS=["🦷","⚖️","🩺","👨‍🍳","📸","🧠","🏛️","🥗","✂️","⚙️","🐾","📚","💊","💄","🏠","🎵","💪","🎨","📊","🩻","💉","🎯","🌸","🤲","💅","🖊️","🚗","⚡","🌿","🛵","🍷","📰","🌐","🧾","🏋️","🧘","🎸","🖥️","✈️","🏡","🔬","🎓","🍕","🎬","📱","🛒","💆","🎭","💎","🔑","🎪","🌍","💼","🏆","🎤","🎹"];
+
+const PALETTES={
+  "Azules":[{c:"#0077b6"},{c:"#023e8a"},{c:"#00b4d8"},{c:"#0d6efd"},{c:"#1a237e"},{c:"#48cae4"},{c:"#03045e"},{c:"#90e0ef"}],
+  "Verdes":[{c:"#2d6a4f"},{c:"#1b4332"},{c:"#386641"},{c:"#40916c"},{c:"#74c69d"},{c:"#0f9d58"},{c:"#6a994e"},{c:"#d4edda"}],
+  "Rojos & Rosas":[{c:"#c1121f"},{c:"#e63946"},{c:"#c9184a"},{c:"#d63384"},{c:"#f72585"},{c:"#590d22"},{c:"#ff758f"},{c:"#ffc8dd"}],
+  "Morados":[{c:"#7b2d8b"},{c:"#9d4edd"},{c:"#6a0572"},{c:"#3a0ca3"},{c:"#4a0e8f"},{c:"#b5179e"},{c:"#e9b4f5"},{c:"#f3e5f5"}],
+  "Oscuros":[{c:"#1a1a2e"},{c:"#1b263b"},{c:"#212529"},{c:"#2c2c3a"},{c:"#0d0d0d"},{c:"#2c3e50"},{c:"#3d2b1f"},{c:"#1a0a2e"}],
+  "Cálidos":[{c:"#e67e22"},{c:"#f57c00"},{c:"#c1121f"},{c:"#784212"},{c:"#6b4226"},{c:"#a0522d"},{c:"#c9a84c"},{c:"#fef9e7"}],
+  "Claros":[{c:"#e8f4fd"},{c:"#e8f8f0"},{c:"#fdeef4"},{c:"#fdf6e3"},{c:"#f0eeff"},{c:"#fdeede"},{c:"#f5f5f5"},{c:"#ffffff"}],
+};
+
+const BG_STYLES=[{l:"Sólido",v:"solid"},{l:"Franjas",v:"stripes"},{l:"Puntos",v:"dots"},{l:"Ondas",v:"waves"},{l:"Diamante",v:"diamond"},{l:"Líneas",v:"lines"}];
+const FOTO_OPTS=[{l:"Centro",v:"center"},{l:"Izquierda",v:"left"},{l:"Derecha",v:"right"},{l:"Arriba iz",v:"topleft"},{l:"Arriba de",v:"topright"},{l:"Sin foto",v:"none"}];
+const QR_POS=[{l:"Abajo iz",v:"bl"},{l:"Abajo de",v:"br"},{l:"Abajo cen",v:"bc"},{l:"Arriba iz",v:"tl"},{l:"Lateral",v:"side"},{l:"Sin QR",v:"none"}];
+const FONTS=[{l:"Arial",v:"Arial,sans-serif"},{l:"Georgia",v:"Georgia,serif"},{l:"Trebuchet",v:"'Trebuchet MS',sans-serif"},{l:"Courier",v:"'Courier New',monospace"},{l:"Palatino",v:"Palatino,serif"},{l:"Verdana",v:"Verdana,sans-serif"}];
+const WM_OPTS=[{l:"Ninguna",v:"none"},{l:"Diagonal",v:"diag"},{l:"Centro",v:"center"},{l:"Esquina",v:"corner"},{l:"Pie pag",v:"foot"}];
+const HERO_STYLES=[{l:"Sólido",v:"solid"},{l:"Geo",v:"geo"},{l:"Ola",v:"wave"},{l:"Puntos",v:"dots"},{l:"Franjas",v:"stripes"},{l:"Diagonal",v:"diag"}];
+const QR_STYLES_LIST=[{l:"Clásico",v:"classic"},{l:"Redondo",v:"round"},{l:"Puntos",v:"dots"},{l:"Diamante",v:"diamond"},{l:"Cruz",v:"cross"},{l:"H-Line",v:"hlines"},{l:"V-Line",v:"vlines"},{l:"Estrella",v:"star"}];
+const WEB_SECS_LIST=["Sobre mí","Servicios","Galería","Contacto","QR","Ubicación"];
+const WEB_SECS_KEYS=["sobremi","servicios","galeria","contacto","qr","ubicacion"];
+
+let S={
+  profMode:"lista",profIdx:0,
+  iconMode:"emoji",iconEmoji:"🦷",
+  fotoSrc:null,fotoMode:"drive",
+  logoSrc:null,logoMode:"drive",
+  qrType:"vcard",qrStyle:"classic",qrURL:"",
+  qrFg:"#0077b6",qrBg:"#ffffff",qrEye:"#023e8a",
+  paletteCat:"Azules",
+  c1:"#0077b6",c2:"#90e0ef",txt:"white",
+  bgStyle:0,foto:0,qrPos:0,font:0,wm:0,heroStyle:0,
+  bgImgSrc:null,bgImgMode:'none',
+  webSecs:{sobremi:true,servicios:true,galeria:true,contacto:true,qr:true,ubicacion:false},
+  mode:"card",
+};
+
+/* ══ HELPERS ══ */
+const enc=s=>encodeURIComponent(s);
+const alpha=(hex,a)=>{const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return`rgba(${r},${g},${b},${a})`};
+const status=(id,msg,ms=4000)=>{const el=document.getElementById(id);if(el){el.textContent=msg;setTimeout(()=>el&&(el.textContent=""),ms);}};
+
+function showLoading(msg="Procesando..."){
+  document.getElementById("loadingText").textContent=msg;
+  document.getElementById("loadingOverlay").classList.add("show");
+}
+function hideLoading(){document.getElementById("loadingOverlay").classList.remove("show");}
+
+function getBG(style,c1,c2){
+  // If custom background image is set, use it
+  if(S.bgImgSrc&&S.bgImgMode!=="none"){
+    return `url('${S.bgImgSrc}') center/cover no-repeat`;
+  }
+  if(style==="solid") return c1;
+  const svgs={
+    stripes:`<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><line x1='0' y1='0' x2='16' y2='16' stroke='${c2}' stroke-width='1.2' opacity='.22'/></svg>`,
+    dots:`<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><circle cx='7' cy='7' r='2.5' fill='${c2}' opacity='.28'/></svg>`,
+    waves:`<svg xmlns='http://www.w3.org/2000/svg' width='50' height='14'><path d='M0 7 Q12.5 0 25 7 Q37.5 14 50 7' fill='none' stroke='${c2}' stroke-width='1.2' opacity='.28'/></svg>`,
+    diamond:`<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22'><polygon points='11,2 20,11 11,20 2,11' fill='none' stroke='${c2}' stroke-width='1' opacity='.22'/></svg>`,
+    lines:`<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'><line x1='0' y1='5' x2='10' y2='5' stroke='${c2}' stroke-width='.8' opacity='.2'/></svg>`,
+  };
+  return`${c1} url("data:image/svg+xml,${enc(svgs[style])}")`;
+}
+
+function getHeroBG(style,c1,c2){
+  if(style==="solid") return c1;
+  if(style==="diag")  return`linear-gradient(135deg,${c1} 55%,${c2} 100%)`;
+  const svgs={
+    geo:`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><polygon points='20,2 38,38 2,38' fill='none' stroke='${c2}' stroke-width='.8' opacity='.25'/></svg>`,
+    wave:`<svg xmlns='http://www.w3.org/2000/svg' width='60' height='20'><path d='M0 10 Q15 0 30 10 Q45 20 60 10' fill='none' stroke='${c2}' stroke-width='1.2' opacity='.3'/></svg>`,
+    dots:`<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><circle cx='8' cy='8' r='2.5' fill='${c2}' opacity='.3'/></svg>`,
+    stripes:`<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><line x1='0' y1='0' x2='16' y2='16' stroke='${c2}' stroke-width='1.2' opacity='.22'/></svg>`,
+  };
+  return`${c1} url("data:image/svg+xml,${enc(svgs[style]||svgs.dots)}")`;
+}
+
+/* ══ QR CANVAS ══ */
+const QR_DATA=[[1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1],[1,0,0,0,0,0,1,0,0,1,0,1,0,0,1,0,0,0,0,0,1],[1,0,1,1,1,0,1,0,1,0,1,0,1,0,1,0,1,1,1,0,1],[1,0,1,1,1,0,1,0,0,0,1,1,0,0,1,0,1,1,1,0,1],[1,0,1,1,1,0,1,0,1,1,0,0,1,0,1,0,1,1,1,0,1],[1,0,0,0,0,0,1,0,0,1,0,1,0,0,1,0,0,0,0,0,1],[1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1],[0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0],[1,0,1,1,0,1,1,1,0,0,1,0,1,1,0,1,1,1,0,1,0],[0,1,0,0,1,0,0,0,1,0,0,1,0,0,1,0,0,0,1,0,1],[1,0,1,0,1,1,1,1,0,1,0,0,1,1,0,1,1,1,0,1,0],[0,1,0,1,0,0,0,0,1,0,1,0,0,0,1,0,0,0,1,0,1],[1,0,1,0,1,1,1,1,0,0,1,0,1,1,0,1,1,1,0,1,0],[0,0,0,0,0,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1],[1,1,1,1,1,1,1,0,0,1,1,0,1,0,1,1,0,1,0,1,0],[1,0,0,0,0,0,1,0,1,0,0,1,0,0,0,0,1,0,1,0,1],[1,0,1,1,1,0,1,0,0,1,1,0,1,0,1,1,0,1,0,1,0],[1,0,1,1,1,0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,1],[1,0,1,1,1,0,1,0,0,1,1,0,1,0,1,0,1,1,0,1,0],[1,0,0,0,0,0,1,0,1,0,0,1,0,1,0,1,0,0,1,0,1],[1,1,1,1,1,1,1,0,0,1,1,0,1,0,1,1,1,1,1,1,1]];
+const SZ=21;
+
+function isEye(r,c){return(r<7&&c<7)||(r<7&&c>=SZ-7)||(r>=SZ-7&&c<7);}
+
+function drawQRStyled(canvas,style,fg,bg,eyeColor){
+  const ctx=canvas.getContext("2d");
+  const W=canvas.width,H=canvas.height;
+  const pad=4;
+  const cell=(W-pad*2)/SZ;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle=bg||"#fff";
+  ctx.beginPath();ctx.roundRect(0,0,W,H,6);ctx.fill();
+  for(let r=0;r<SZ;r++){
+    for(let c=0;c<SZ;c++){
+      if(!QR_DATA[r][c]) continue;
+      const x=pad+c*cell,y=pad+r*cell;
+      const cx=x+cell/2,cy=y+cell/2;
+      const s=cell*0.88;
+      const eye=isEye(r,c);
+      ctx.fillStyle=eye?(eyeColor||fg):fg;
+      if(style==="classic"||eye){ctx.fillRect(x+.5,y+.5,cell-1,cell-1);}
+      else if(style==="round"){ctx.beginPath();ctx.roundRect(x+.5,y+.5,cell-1,cell-1,cell*.38);ctx.fill();}
+      else if(style==="dots"){ctx.beginPath();ctx.arc(cx,cy,s*.46,0,Math.PI*2);ctx.fill();}
+      else if(style==="diamond"){const r2=s*.5;ctx.beginPath();ctx.moveTo(cx,cy-r2);ctx.lineTo(cx+r2,cy);ctx.lineTo(cx,cy+r2);ctx.lineTo(cx-r2,cy);ctx.closePath();ctx.fill();}
+      else if(style==="cross"){const t=s*.25,arm=s*.5;ctx.fillRect(cx-t,cy-arm,t*2,arm*2);ctx.fillRect(cx-arm,cy-t,arm*2,t*2);}
+      else if(style==="hlines"){ctx.fillRect(x+.5,y+cell*.2,cell-1,cell*.6);}
+      else if(style==="vlines"){ctx.fillRect(x+cell*.2,y+.5,cell*.6,cell-1);}
+      else if(style==="star"){const n=4,R=s*.5,ri=s*.2;ctx.beginPath();for(let i=0;i<n*2;i++){const ang=(i*Math.PI/n)-Math.PI/2;const rad=i%2===0?R:ri;i===0?ctx.moveTo(cx+rad*Math.cos(ang),cy+rad*Math.sin(ang)):ctx.lineTo(cx+rad*Math.cos(ang),cy+rad*Math.sin(ang));}ctx.closePath();ctx.fill();}
+    }
+  }
+}
+
+function makeStyledQR(containerId,size){
+  const box=document.getElementById(containerId);
+  if(!box) return;
+  box.innerHTML="";
+  const url=buildQRContent();
+  S.qrURL=url;
+  if(!url||url.length<2) return;
+
+  const fg=document.getElementById("qrFg")?document.getElementById("qrFg").value:"#000000";
+  const bg=document.getElementById("qrBg")?document.getElementById("qrBg").value:"#ffffff";
+  const sz=size||90;
+
+  // Use QRCode.js for real scannable QR
+  try {
+    new QRCode(box, {
+      text: url,
+      width: sz,
+      height: sz,
+      colorDark: fg,
+      colorLight: bg,
+      correctLevel: QRCode.CorrectLevel.H
+    });
+    // Style after generation
+    setTimeout(()=>{
+      const img=box.querySelector("img");
+      const cv=box.querySelector("canvas");
+      // Force exact square — same size as QR
+      if(cv) cv.style.display="none";
+      if(img){
+        img.style.cssText=`display:block;width:${sz}px;height:${sz}px;image-rendering:pixelated`;
+        // Force parent to match exactly
+        if(box.parentElement){
+          const pad=6; // padding in container
+          box.style.width=(sz+pad*2)+"px";
+          box.style.height=(sz+pad*2)+"px";
+          box.style.padding=pad+"px";
+        }
+      } else if(cv){
+        cv.style.cssText=`display:block;width:${sz}px;height:${sz}px`;
+        if(box.parentElement){
+          const pad=6;
+          box.style.width=(sz+pad*2)+"px";
+          box.style.height=(sz+pad*2)+"px";
+          box.style.padding=pad+"px";
+        }
+      }
+    },150);
+  } catch(e) {
+    // Fallback
+    const cv=document.createElement("canvas");
+    cv.width=sz;cv.height=sz;
+    box.appendChild(cv);
+    drawQRStyled(cv,S.qrStyle,fg,bg,fg);
+  }
+}
+
+/* ══ DESCARGA CON HTML2CANVAS ══ */
+async function descargarTarjeta(){
+  showLoading("Generando imagen de tarjeta...");
+
+  // Step 1: Regenerate a real QR image inside the card before capture
+  const url = buildQRContent();
+  const nombre = (document.getElementById("fNombre").value||"cliente").replace(/\s+/g,"_");
+
+  // Step 2: Create a clean offscreen clone of the card with QR as image
+  const card = document.getElementById("card");
+
+  try {
+    // Generate QR as canvas first
+    const qrTmp = document.createElement("div");
+    qrTmp.style.cssText = "position:absolute;left:-9999px;top:-9999px";
+    document.body.appendChild(qrTmp);
+
+    await new Promise((resolve) => {
+      try {
+        new QRCode(qrTmp, {
+          text: url,
+          width: 150,
+          height: 150,
+          colorDark: document.getElementById("qrFg") ? document.getElementById("qrFg").value : "#000000",
+          colorLight: document.getElementById("qrBg") ? document.getElementById("qrBg").value : "#ffffff",
+          correctLevel: QRCode.CorrectLevel.M
+        });
+        setTimeout(resolve, 300);
+      } catch(e) { resolve(); }
+    });
+
+    // Get QR as data URL
+    const qrCanvas = qrTmp.querySelector("canvas");
+    const qrDataUrl = qrCanvas ? qrCanvas.toDataURL("image/png") : null;
+    document.body.removeChild(qrTmp);
+
+    // Replace QR in card with clean image
+    const qrBox = card.querySelector('[id^="qrC"]');
+    let origQRContent = "";
+    if(qrBox && qrDataUrl) {
+      origQRContent = qrBox.innerHTML;
+      qrBox.innerHTML = `<img src="${qrDataUrl}" style="width:90px;height:90px;display:block;border-radius:6px" crossorigin="anonymous">`;
+    }
+
+    // Step 3: Capture card
+    await new Promise(r => setTimeout(r, 100));
+    const canvas = await html2canvas(card, {
+      scale: 3,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: null,
+      logging: false,
+      imageTimeout: 0,
+    });
+
+    // Restore original QR
+    if(qrBox && origQRContent) qrBox.innerHTML = origQRContent;
+
+    // Step 4: Download
+    const link = document.createElement("a");
+    link.download = `tarjeta_${nombre}.png`;
+    link.href = canvas.toDataURL("image/png", 1.0);
+    link.click();
+    status("st1", "✅ Tarjeta descargada — QR escaneable incluido");
+    status("st3", "✅ Tarjeta descargada");
+
+  } catch(e) {
+    status("st1", "⚠️ Error: " + e.message);
+    status("st3", "⚠️ Error al descargar");
+  } finally {
+    hideLoading();
+  }
+}
+
+async function descargarQRSeparado(){
+  // Build vCard content
+  const nombre=document.getElementById("fNombre").value||"Cliente";
+  const empresa=document.getElementById("fEmpresa").value||"";
+  const wa=document.getElementById("fWa").value.replace(/\D/g,"");
+  const email=document.getElementById("fEmail").value||"";
+  const web=document.getElementById("fWeb").value||"";
+  const tel=document.getElementById("fWa").value||"";
+
+  const vcard=`BEGIN:VCARD
+VERSION:3.0
+FN:${nombre}
+ORG:${empresa}
+TEL:${tel}
+EMAIL:${email}
+URL:${web}
+END:VCARD`;
+
+  const fg=document.getElementById("qrFg")?document.getElementById("qrFg").value:"#000000";
+  const bg=document.getElementById("qrBg")?document.getElementById("qrBg").value:"#ffffff";
+  const nombreFile=nombre.replace(/\s+/g,"_");
+
+  // Create printable QR card
+  const tmp=document.createElement("div");
+  tmp.style.cssText="position:absolute;left:-9999px;top:-9999px;background:#fff;padding:20px;border-radius:12px;text-align:center;font-family:Arial,sans-serif;width:300px";
+  tmp.innerHTML=`
+    <div style="font-size:11px;color:#888;margin-bottom:8px;letter-spacing:1px;text-transform:uppercase">Escanea para guardar mi contacto</div>
+    <div id="qrPrintBox"></div>
+    <div style="font-size:14px;font-weight:700;color:#1a1a2e;margin-top:10px">${nombre}</div>
+    <div style="font-size:11px;color:#666;margin-top:3px">${empresa}</div>
+    <div style="font-size:11px;color:#666;margin-top:2px">${tel}</div>
+    <div style="font-size:9px;color:#aaa;margin-top:8px">Mi Tarjeta Pro</div>
+  `;
+  document.body.appendChild(tmp);
+
+  try{
+    new QRCode(document.getElementById("qrPrintBox"),{
+      text:vcard,
+      width:220,height:220,
+      colorDark:fg,colorLight:bg,
+      correctLevel:QRCode.CorrectLevel.M
+    });
+    setTimeout(async()=>{
+      try{
+        const canvas=await html2canvas(tmp,{scale:3,backgroundColor:"#ffffff"});
+        const link=document.createElement("a");
+        link.download=`QR_contacto_${nombreFile}.png`;
+        link.href=canvas.toDataURL("image/png",1.0);
+        link.click();
+        status("st1","✅ QR vCard descargado — listo para imprimir o compartir");
+        status("st3","✅ QR separado descargado");
+      }catch(e){
+        status("st1","⚠️ Error: "+e.message);
+      }finally{
+        document.body.removeChild(tmp);
+        hideLoading();
+      }
+    },400);
+  }catch(e){
+    document.body.removeChild(tmp);
+    status("st1","⚠️ Error al generar QR: "+e.message);
+  }
+}
+
+async function descargarQR(){
+  const url=buildQRContent();
+  if(!url){status("st1","⚠️ Configura el QR primero");return;}
+  const fg=document.getElementById("qrFg").value||"#000000";
+  const bg=document.getElementById("qrBg").value||"#ffffff";
+  const nombre=(document.getElementById("fNombre").value||"cliente").replace(/\s+/g,"_");
+
+  // Generate real QR in hidden div
+  const tmp=document.createElement("div");
+  tmp.style.cssText="position:absolute;left:-9999px;top:-9999px";
+  document.body.appendChild(tmp);
+  try{
+    new QRCode(tmp,{text:url,width:400,height:400,colorDark:fg,colorLight:bg,correctLevel:QRCode.CorrectLevel.M});
+    setTimeout(()=>{
+      const img=tmp.querySelector("img");
+      const cv=tmp.querySelector("canvas");
+      const link=document.createElement("a");
+      link.download=`qr_${nombre}.png`;
+      if(cv) link.href=cv.toDataURL("image/png",1.0);
+      else if(img) link.href=img.src;
+      link.click();
+      document.body.removeChild(tmp);
+      status("st1","✅ QR real descargado — escanéalo para verificar");
+      status("st3","✅ QR descargado");
+    },300);
+  }catch(e){
+    document.body.removeChild(tmp);
+    status("st1","⚠️ Error al generar QR: "+e.message);
+  }
+}
+
+/* SVGs */
+const SVG={
+  phone:c=>`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.022 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/></svg>`,
+  mail:c=>`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`,
+  web:c=>`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>`,
+  ig:c=>`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="${c}" stroke="none"/></svg>`,
+  wa:c=>`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>`,
+  save:c=>`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>`,
+  fb:c=>`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>`,
+  tiktok:c=>`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2"><path d="M9 12a4 4 0 104 4V4a5 5 0 005 5"/></svg>`,
+};
+
+function getActiveEmoji(){
+  if(S.iconMode==="none") return "";
+  if(S.iconMode==="custom") return document.getElementById("customEmoji")?.value||"⭐";
+  return S.iconEmoji;
+}
+function getActiveProfName(){return S.profMode==="manual"?(document.getElementById("profManualN")?.value||"Mi Profesión"):PROFS[S.profIdx].n;}
+function getActiveProfSub(){return S.profMode==="manual"?(document.getElementById("profManualS")?.value||""):PROFS[S.profIdx].s;}
+
+function buildQRContent(){
+  const dato=document.getElementById("fQrDato").value.trim();
+  const wa=document.getElementById("fWa").value.replace(/\D/g,"");
+  if(S.qrType==="wa") return"https://wa.me/"+wa+"?text="+enc(dato||"Hola!");
+  if(S.qrType==="perfil") return dato||document.getElementById("fWeb").value||"https://mipro.com";
+  const nombre=document.getElementById("fNombre").value;
+  const email=document.getElementById("fEmail").value;
+  const web=document.getElementById("fWeb").value;
+  return`BEGIN:VCARD\nVERSION:3.0\nFN:${nombre}\nTEL:${wa}\nEMAIL:${email}\nURL:${web}\nEND:VCARD`;
+}
+
+/* ══ FOTO Y LOGO ══ */
+function setFotoMode(tipo,m,el){
+  if(tipo==="foto"){
+    S.fotoMode=m;
+    document.querySelectorAll("#fotoOptDrive,#fotoOptFile,#fotoOptUrl,#fotoOptNone").forEach(f=>f.classList.remove("on"));
+    el.classList.add("on");
+    ["fotoBlockDrive","fotoBlockFile","fotoBlockUrl"].forEach(id=>document.getElementById(id).style.display="none");
+    if(m!=="none") document.getElementById("fotoBlock"+m.charAt(0).toUpperCase()+m.slice(1)).style.display="block";
+    if(m==="none"){S.fotoSrc=null;updatePreviews();}
+  } else {
+    S.logoMode=m;
+    document.querySelectorAll("#logoOptDrive,#logoOptFile,#logoOptUrl,#logoOptNone").forEach(f=>f.classList.remove("on"));
+    el.classList.add("on");
+    ["logoBlockDrive","logoBlockFile","logoBlockUrl"].forEach(id=>document.getElementById(id).style.display="none");
+    if(m!=="none") document.getElementById("logoBlock"+m.charAt(0).toUpperCase()+m.slice(1)).style.display="block";
+    if(m==="none"){S.logoSrc=null;updatePreviews();}
+  }
+}
+
+function cargarDrive(tipo){
+  const input=tipo==="foto"?"driveLinkFoto":"driveLinkLogo";
+  const url=document.getElementById(input).value.trim();
+  let fileId="";
+  const m1=url.match(/\/file\/d\/([^\/\?]+)/);
+  const m2=url.match(/id=([^&]+)/);
+  if(m1) fileId=m1[1];
+  else if(m2) fileId=m2[1];
+  if(fileId){
+    const src=`https://drive.google.com/thumbnail?id=${fileId}&sz=w400`;
+    if(tipo==="foto") S.fotoSrc=src;
+    else S.logoSrc=src;
+    updatePreviews();
+    status("st1","✅ "+(tipo==="foto"?"Foto":"Logo")+" cargado desde Drive");
+  } else {
+    status("st1","⚠️ Link de Drive no válido");
+  }
+}
+
+function cargarFile(tipo,input){
+  const file=input.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    if(tipo==="foto") S.fotoSrc=e.target.result;
+    else S.logoSrc=e.target.result;
+    updatePreviews();renderAll();
+  };
+  reader.readAsDataURL(file);
+}
+
+function cargarURL(tipo){
+  const url=tipo==="foto"?document.getElementById("urlFoto").value.trim():document.getElementById("urlLogo").value.trim();
+  if(!url) return;
+  if(tipo==="foto") S.fotoSrc=url;
+  else S.logoSrc=url;
+  updatePreviews();renderAll();
+}
+
+function updatePreviews(){
+  // Foto
+  const fp=document.getElementById("fotoPreview");
+  const fph=document.getElementById("fotoPH");
+  if(S.fotoSrc&&S.fotoMode!=="none"){
+    fp.src=S.fotoSrc;fp.style.display="block";fph.style.display="none";
+    fp.onload=()=>renderAll();
+    fp.onerror=()=>{S.fotoSrc=null;fp.style.display="none";fph.style.display="flex";};
+  } else {fp.style.display="none";fph.style.display="flex";}
+  // Logo
+  const lp=document.getElementById("logoPreview");
+  const lph=document.getElementById("logoPH");
+  if(S.logoSrc&&S.logoMode!=="none"){
+    lp.src=S.logoSrc;lp.style.display="block";lph.style.display="none";
+    lp.onload=()=>renderAll();
+    lp.onerror=()=>{S.logoSrc=null;lp.style.display="none";lph.style.display="flex";};
+  } else {lp.style.display="none";lph.style.display="flex";}
+}
+
+/* ══ AVATAR HTML ══ */
+function avatarHTML(size,fs,tc,c2){
+  const emoji=getActiveEmoji();
+  const st=`width:${size}px;height:${size}px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:${fs}px;border:2.5px solid rgba(255,255,255,.45);flex-shrink:0;overflow:hidden;background:${alpha(c2,.22)}`;
+  if(S.fotoSrc&&S.fotoMode!=="none"){
+    return`<div style="${st}"><img src="${S.fotoSrc}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block" crossorigin="anonymous"></div>`;
+  }
+  if(!emoji) return"";
+  return`<div style="${st};color:${tc}">${emoji}</div>`;
+}
+
+function logoHTML(size){
+  if(!S.logoSrc||S.logoMode==="none") return"";
+  return`<div style="width:${size}px;height:${size}px;border-radius:7px;overflow:hidden;flex-shrink:0;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center"><img src="${S.logoSrc}" style="width:100%;height:100%;object-fit:contain;border-radius:6px" crossorigin="anonymous"></div>`;
+}
+
+/* ══ RENDER TARJETA ══ */
+function renderCard(cardId,qrId){
+  const nombre=document.getElementById("fNombre").value||"Tu Nombre";
+  const empresa=document.getElementById("fEmpresa").value||"Tu Empresa";
+  const eslogan=document.getElementById("fEslogan").value||"Tu eslogan";
+  const waVal=document.getElementById("fWa").value;
+  const emailVal=document.getElementById("fEmail").value;
+  const webVal=document.getElementById("fWeb").value;
+  const igVal=document.getElementById("fIg").value;
+  const profNombre=getActiveProfName();
+  var fb=document.getElementById("fFb")?document.getElementById("fFb").value:"";
+  var tk=document.getElementById("fTk")?document.getElementById("fTk").value:"";
+  const c1=S.c1,c2=S.c2;
+  const font=FONTS[S.font].v;
+  const foto=FOTO_OPTS[S.foto].v;
+  const qrPos=QR_POS[S.qrPos].v;
+  const tc=S.txt==="white"?"#ffffff":"#111111";
+  const tc2=S.txt==="white"?"rgba(255,255,255,.72)":"rgba(0,0,0,.6)";
+  const bg=getBG(BG_STYLES[S.bgStyle].v,c1,c2);
+
+  const ava=avatarHTML(60,22,tc,c2);
+  const logo=logoHTML(38);
+
+  // empresa + logo row
+  const empresaRow=logo
+    ?`<div style="display:flex;align-items:center;justify-content:space-between;width:100%">${logo}<div style="font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:${tc2};font-family:${font};text-align:right;flex:1;padding-left:5px">${empresa}</div></div>`
+    :`<div style="font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:${tc2};font-family:${font}">${empresa}</div>`;
+
+  var fb=document.getElementById("fFb")?document.getElementById("fFb").value:"";
+  var tk=document.getElementById("fTk")?document.getElementById("fTk").value:"";
+  const info=`<div style="display:flex;flex-direction:column;gap:3px">
+    <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:${tc2}">${SVG.phone(tc2)}<span>${waVal}</span></div>
+    <div style="display:flex;align-items:center;gap:5px;font-size:9.5px;color:${tc2};word-break:break-all">${SVG.mail(tc2)}<span>${emailVal}</span></div>
+    <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:${tc2}">${SVG.web(tc2)}<span>${webVal}</span></div>
+    ${igVal?`<div style="display:flex;align-items:center;gap:5px;font-size:10px;color:${tc2}">${SVG.ig(tc2)}<span>${igVal}</span></div>`:""}
+    ${fb?`<div style="display:flex;align-items:center;gap:5px;font-size:10px;color:${tc2}">${SVG.fb(tc2)}<span>${fb}</span></div>`:""}
+    ${tk?`<div style="display:flex;align-items:center;gap:5px;font-size:10px;color:${tc2}">${SVG.tiktok(tc2)}<span>${tk}</span></div>`:""}
+  </div>
+  <div style="display:flex;align-items:center;gap:4px;font-size:8.5px;opacity:.6;margin-top:3px;color:${tc2}">${SVG.save(tc2)} Guardar contacto</div>`;
+
+  const nb=`<div style="font-size:16px;font-weight:800;line-height:1.2;color:${tc};font-family:${font}">${nombre}</div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;opacity:.82;color:${tc2};font-family:${font}">${profNombre}</div>
+    <div style="font-size:10px;font-style:italic;opacity:.82;color:${tc2};font-family:${font};line-height:1.4">${eslogan}</div>`;
+  const div=`<div style="height:1px;background:rgba(255,255,255,.22);margin:3px 0"></div>`;
+
+  let body="";
+  if(foto==="none")        body=`${empresaRow}${nb}${div}${info}`;
+  else if(foto==="center") body=`${empresaRow}<div style="display:flex;justify-content:center">${ava}</div>${nb}${div}${info}`;
+  else if(foto==="left")   body=`${empresaRow}<div style="display:flex;align-items:flex-start;gap:8px">${ava}<div style="flex:1">${nb}</div></div>${div}${info}`;
+  else if(foto==="right")  body=`${empresaRow}<div style="display:flex;align-items:flex-start;gap:8px"><div style="flex:1">${nb}</div>${ava}</div>${div}${info}`;
+  else if(foto==="topleft")body=`<div style="display:flex;align-items:center;gap:7px">${ava}${empresaRow}</div>${div}${nb}${div}${info}`;
+  else                     body=`<div style="display:flex;align-items:center;justify-content:flex-end;gap:7px">${empresaRow}${ava}</div>${div}${nb}${div}${info}`;
+
+  // watermark
+  const wc=S.txt==="white"?"rgba(255,255,255,.07)":"rgba(0,0,0,.06)";
+  let wm="";
+  if(S.wm===1) wm=`<div style="position:absolute;top:50%;left:-10%;transform:rotate(-35deg);font-size:22px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:${wc};font-family:${font};pointer-events:none;white-space:nowrap">${empresa} ${empresa}</div>`;
+  if(S.wm===2) wm=`<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:38px;color:${wc};pointer-events:none">${getActiveEmoji()||"★"}</div>`;
+  if(S.wm===3) wm=`<div style="position:absolute;bottom:22px;right:8px;font-size:7px;opacity:.3;color:${tc};font-family:${font};pointer-events:none">${empresa}</div>`;
+  if(S.wm===4) wm=`<div style="position:absolute;bottom:14px;left:0;right:0;text-align:center;font-size:7px;letter-spacing:2px;opacity:.3;color:${tc};font-family:${font};pointer-events:none">${empresa.toUpperCase()}</div>`;
+
+  const qps={bl:"bottom:10px;left:10px",br:"bottom:10px;right:10px",bc:"bottom:10px;left:50%;transform:translateX(-50%)",tl:"top:14px;left:10px",side:"right:6px;top:50%;transform:translateY(-50%)"};
+  const qrHTML=qrPos!=="none"?`<div id="${qrId}" style="position:absolute;${qps[qrPos]};z-index:10;width:102px;height:102px;background:#ffffff;border-radius:8px;padding:6px;box-shadow:0 2px 10px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;overflow:hidden"></div>`:`<div id="${qrId}" style="display:none"></div>`;
+
+  const card=document.getElementById(cardId);
+  if(!card) return;
+  card.style.background=bg;
+  card.innerHTML=`
+    <div style="height:5px;width:100%;background:${c2}"></div>
+    ${wm}
+    <div style="flex:1;display:flex;flex-direction:column;padding:12px 11px 9px;gap:4px">${body}</div>
+    ${qrHTML}
+    <!-- sin pie de tarjeta -->`;
+  setTimeout(()=>makeStyledQR(qrId,90),60);
+}
+
+/* ══ RENDER WEB ══ */
+function renderWeb(containerId,qrId){
+  const nombre=document.getElementById("fNombre").value||"Tu Nombre";
+  const empresa=document.getElementById("fEmpresa").value||"Tu Empresa";
+  const eslogan=document.getElementById("fEslogan").value||"Tu eslogan";
+  const desc=document.getElementById("fDesc")?document.getElementById("fDesc").value||eslogan:eslogan;
+  const waVal=document.getElementById("fWa").value;
+  const emailVal=document.getElementById("fEmail").value;
+  const webVal=document.getElementById("fWeb").value;
+  const igVal=document.getElementById("fIg").value;
+  const svcs=document.getElementById("fSvcs").value.split(",").map(s=>s.trim()).filter(Boolean).slice(0,4);
+  const profNombre=getActiveProfName();
+  const c1=S.c1,c2=S.c2;
+  const tc=S.txt==="white"?"#ffffff":"#111111";
+  const sec2=alpha(c2,.18);
+  const emoji=getActiveEmoji();
+
+  const webAva=S.fotoSrc&&S.fotoMode!=="none"
+    ?`<div class="web-avatar" style="background:${alpha(c2,.28)};border:3px solid rgba(255,255,255,.5)"><img src="${S.fotoSrc}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" crossorigin="anonymous"></div>`
+    :`<div class="web-avatar" style="background:${alpha(c2,.28)};color:${tc}">${emoji}</div>`;
+
+  const webLogo=S.logoSrc&&S.logoMode!=="none"
+    ?`<div style="width:44px;height:44px;border-radius:8px;overflow:hidden;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 6px"><img src="${S.logoSrc}" style="width:100%;height:100%;object-fit:contain" crossorigin="anonymous"></div>`
+    :"";
+
+  let html=`<div class="web-hero" style="background:${getHeroBG(HERO_STYLES[S.heroStyle].v,c1,c2)}">
+    ${webAva}${webLogo}
+    <div style="font-size:16px;font-weight:700;line-height:1.2;margin-bottom:3px;color:${tc}">${nombre}</div>
+    <div style="font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;opacity:.8;margin-bottom:2px;color:${tc}">${profNombre}</div>
+    ${empresa?`<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;opacity:.65;margin-bottom:3px;color:${tc}">${empresa}</div>`:""}
+    <div style="font-size:10.5px;font-style:italic;opacity:.7;color:${tc}">${eslogan}</div>
+  </div>
+  <div class="web-accent" style="background:${c2}"></div>
+  <div class="web-body" style="background:#f9f9f9">`;
+
+  const ws=S.webSecs;
+  if(ws.sobremi)   html+=`<div class="web-sec" style="background:${sec2}"><div class="web-sec-t" style="color:${c1}">Sobre mí</div><div style="font-size:10.5px;color:#333;line-height:1.6">${desc}</div></div>`;
+  if(ws.servicios) html+=`<div class="web-sec" style="background:${sec2}"><div class="web-sec-t" style="color:${c1}">Servicios</div><div class="web-svcs">${svcs.map(s=>`<div class="web-svc" style="background:${c1}">${s}</div>`).join("")}</div></div>`;
+  if(ws.galeria)   html+=`<div class="web-sec" style="background:${sec2}"><div class="web-sec-t" style="color:${c1}">Galería</div><div class="web-gallery">${[1,2,3,4,5,6].map(i=>`<div class="web-gal" style="background:${alpha(c1,.1+i*.04)};color:${c1}">Foto ${i}</div>`).join("")}</div></div>`;
+  if(ws.contacto)  html+=`<div class="web-sec" style="background:${sec2}"><div class="web-sec-t" style="color:${c1}">Contacto</div>
+    <div class="web-crow"><div class="web-icon" style="background:${c1}">${SVG.phone("#fff")}</div><span style="font-size:10.5px;color:#333">${waVal}</span></div>
+    <div class="web-crow"><div class="web-icon" style="background:${c1}">${SVG.mail("#fff")}</div><span style="font-size:10px;color:#333;word-break:break-all">${emailVal}</span></div>
+    ${igVal?`<div class="web-crow"><div class="web-icon" style="background:#e1306c">${SVG.ig("#fff")}</div><span style="font-size:10.5px;color:#333">${igVal}</span></div>`:""}
+    ${fb?`<div class="web-crow"><div class="web-icon" style="background:#1877f2">${SVG.fb("#fff")}</div><span style="font-size:10.5px;color:#333">${fb}</span></div>`:""}
+    ${tk?`<div class="web-crow"><div class="web-icon" style="background:#000">${SVG.tiktok("#fff")}</div><span style="font-size:10.5px;color:#333">${tk}</span></div>`:""}
+    <div class="web-crow"><div class="web-icon" style="background:#25d366">${SVG.wa("#fff")}</div><span style="font-size:10.5px;color:#333">WhatsApp directo</span></div>
+    <div class="web-crow"><div class="web-icon" style="background:${c1}">${SVG.web("#fff")}</div><span style="font-size:10.5px;color:#333">${webVal}</span></div>
+  </div>`;
+  if(ws.qr)        html+=`<div class="web-qr-row" style="background:${sec2}"><div id="${qrId}"></div><div><div style="font-size:11px;font-weight:700;color:${c1};margin-bottom:3px">Escanea y contáctame</div><div style="font-size:9.5px;color:#666">WhatsApp · Contacto · Perfil</div></div></div>`;
+  if(ws.ubicacion) html+=`<div class="web-sec" style="background:${sec2}"><div class="web-sec-t" style="color:${c1}">Ubicación</div><div style="background:${alpha(c1,.1)};border-radius:7px;height:46px;display:flex;align-items:center;justify-content:center;font-size:10.5px;color:${c1};font-weight:600">📍 Mapa de Google</div></div>`;
+  html+=`</div><div class="web-footer" style="background:${c1};color:rgba(255,255,255,.65)">${empresa}</div>`;
+
+  const box=document.getElementById(containerId);
+  if(box){
+    box.innerHTML=html;
+    setTimeout(()=>{
+      const qrBox=document.getElementById(qrId);
+      if(qrBox){
+        qrBox.style.cssText="background:#ffffff;border-radius:8px;padding:6px;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);width:92px;height:92px;overflow:hidden";
+        const cv=document.createElement("canvas");cv.width=80;cv.height=80;cv.style.cssText="display:block;width:80px;height:80px";
+        qrBox.appendChild(cv);
+        const fg=document.getElementById("qrFg").value;
+        const bg2=document.getElementById("qrBg").value;
+        const eye=document.getElementById("qrEye").value;
+        drawQRStyled(cv,S.qrStyle,fg,bg2,eye);
+      }
+    },80);
+  }
+}
+
+function setBgImg(m,el){
+  S.bgImgMode=m;
+  document.querySelectorAll("#bgImgOptNone,#bgImgOptFile,#bgImgOptDrive,#bgImgOptUrl").forEach(f=>f.classList.remove("on"));
+  el.classList.add("on");
+  ["bgImgBlockFile","bgImgBlockDrive","bgImgBlockUrl"].forEach(id=>document.getElementById(id).style.display="none");
+  if(m==="file") document.getElementById("bgImgBlockFile").style.display="block";
+  if(m==="drive") document.getElementById("bgImgBlockDrive").style.display="block";
+  if(m==="url") document.getElementById("bgImgBlockUrl").style.display="block";
+  if(m==="none"){S.bgImgSrc=null;document.getElementById("bgImgPreviewWrap").style.display="none";renderAll();}
+}
+
+function cargarBgFile(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{S.bgImgSrc=e.target.result;showBgPreview();renderAll();};
+  reader.readAsDataURL(file);
+}
+
+function cargarBgDrive(){
+  const url=document.getElementById("driveLinkBg").value.trim();
+  let fileId="";
+  const m1=url.match(/\/file\/d\/([^\/\?]+)/);
+  const m2=url.match(/id=([^&]+)/);
+  if(m1) fileId=m1[1];else if(m2) fileId=m2[1];
+  if(fileId){S.bgImgSrc=`https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;showBgPreview();renderAll();}
+}
+
+function cargarBgUrl(){
+  const url=document.getElementById("urlBg").value.trim();
+  if(!url)return;
+  S.bgImgSrc=url;showBgPreview();renderAll();
+}
+
+function showBgPreview(){
+  const prev=document.getElementById("bgImgPreview");
+  const wrap=document.getElementById("bgImgPreviewWrap");
+  if(S.bgImgSrc){prev.src=S.bgImgSrc;wrap.style.display="block";}
+}
+
+function abrirDrive(){
+  const link=document.getElementById("driveFolderLink").value.trim();
+  if(link) window.open(link,"_blank");
+  else alert("Pega el link de tu carpeta de Google Drive primero");
+}
+
+function setLibraryType(tipo){
+  ["icono","fondo","frase"].forEach(t=>{
+    const el=document.getElementById("lib"+t.charAt(0).toUpperCase()+t.slice(1)+"Block");
+    if(el) el.style.display=t===tipo?"block":"none";
+  });
+}
+
+function driveThumb(url){
+  let fileId="";
+  const m1=url.match(/\/file\/d\/([^\/\?]+)/);
+  const m2=url.match(/id=([^&]+)/);
+  if(m1) fileId=m1[1];
+  else if(m2) fileId=m2[1];
+  return fileId?`https://drive.google.com/thumbnail?id=${fileId}&sz=w400`:url;
+}
+
+function aplicarIconoDrive(){
+  const url=document.getElementById("libIconoLink").value.trim();
+  if(!url){alert("Pega el link del ícono");return;}
+  S.logoSrc=driveThumb(url);
+  S.logoMode="drive";
+  updatePreviews();
+  renderAll();
+  status("st1","✅ Ícono aplicado desde Drive");
+}
+
+function aplicarFondoDrive(){
+  const url=document.getElementById("libFondoLink").value.trim();
+  if(!url){alert("Pega el link del fondo");return;}
+  S.bgImgSrc=driveThumb(url);
+  S.bgImgMode="drive";
+  const prev=document.getElementById("bgImgPreview");
+  const wrap=document.getElementById("bgImgPreviewWrap");
+  if(prev&&wrap){prev.src=S.bgImgSrc;wrap.style.display="block";}
+  renderAll();
+  status("st1","✅ Fondo aplicado desde Drive");
+}
+
+function aplicarFrase(){
+  const frase=document.getElementById("libFraseTexto").value;
+  document.getElementById("fEslogan").value=frase;
+  renderAll();
+}
+
+function renderAll(){
+  const m=S.mode;
+  if(m==="card") renderCard("card","qrC");
+  if(m==="web")  renderWeb("webPreview","qrW");
+  if(m==="both"){renderCard("card2","qrC2");renderWeb("webPreview2","qrW2");}
+}
+
+/* ══ BUILD UI ══ */
+function setProfMode(m,el){
+  S.profMode=m;
+  document.querySelectorAll(".prof-tab").forEach(t=>t.classList.remove("on"));el.classList.add("on");
+  document.getElementById("profListaBlock").style.display=m==="lista"?"block":"none";
+  document.getElementById("profManualBlock").style.display=m==="manual"?"block":"none";
+  renderAll();
+}
+
+function setIconMode(m,el){
+  S.iconMode=m;
+  document.querySelectorAll(".icon-tab").forEach(t=>t.classList.remove("on"));el.classList.add("on");
+  document.getElementById("iconEmojiBlock").style.display=m==="emoji"?"block":"none";
+  document.getElementById("iconCustomBlock").style.display=m==="custom"?"block":"none";
+  renderAll();
+}
+
+function buildGradientGallery(){
+  // Fondos se agregarán aquí
+}
+
+function buildProfGrid(){
+  const g=document.getElementById("profGrid");
+  PROFS.forEach((p,i)=>{
+    const d=document.createElement("div");
+    d.className="prof-item"+(i===0?" on":"");
+    d.innerHTML=`<div class="pi-icon">${p.e}</div><div class="pi-name">${p.n}</div>`;
+    d.onclick=()=>{
+      S.profIdx=i;
+      document.querySelectorAll(".prof-item").forEach((el,j)=>el.classList.toggle("on",j===i));
+      if(S.iconMode==="emoji"){S.iconEmoji=p.e;syncIconGrid();}
+      renderAll();
+    };
+    g.appendChild(d);
+  });
+}
+
+function buildIconGrid(){
+  const g=document.getElementById("iconGrid");
+  EMOJIS.forEach((em,i)=>{
+    const d=document.createElement("div");
+    d.className="icon-item"+(em===S.iconEmoji?" on":"");
+    d.textContent=em;
+    d.onclick=()=>{S.iconEmoji=em;document.querySelectorAll(".icon-item").forEach((el,j)=>el.classList.toggle("on",EMOJIS[j]===em));renderAll();};
+    g.appendChild(d);
+  });
+}
+
+function syncIconGrid(){
+  document.querySelectorAll(".icon-item").forEach((el,j)=>el.classList.toggle("on",EMOJIS[j]===S.iconEmoji));
+}
+
+function buildQRStyleGrid(){
+  const g=document.getElementById("qrStyleGrid");
+  QR_STYLES_LIST.forEach((qs,i)=>{
+    const d=document.createElement("div");
+    d.className="qr-style-item"+(i===0?" on":"");
+    const cv=document.createElement("canvas");cv.width=34;cv.height=34;
+    drawQRStyled(cv,qs.v,"#0077b6","#ffffff","#023e8a");
+    const lbl=document.createElement("div");lbl.className="qr-style-lbl";lbl.textContent=qs.l;
+    d.appendChild(cv);d.appendChild(lbl);
+    d.onclick=()=>{
+      S.qrStyle=qs.v;
+      document.querySelectorAll(".qr-style-item").forEach((el,j)=>el.classList.toggle("on",j===i));
+      renderAll();
+    };
+    g.appendChild(d);
+  });
+}
+
+function buildPaletteCats(){
+  const g=document.getElementById("paletteCats");g.innerHTML="";
+  Object.keys(PALETTES).forEach(cat=>{
+    const d=document.createElement("div");
+    d.className="pcat"+(cat===S.paletteCat?" on":"");
+    d.textContent=cat;
+    d.onclick=()=>{S.paletteCat=cat;buildPaletteCats();buildPaletteSwatches();};
+    g.appendChild(d);
+  });
+}
+
+function buildPaletteSwatches(){
+  const g=document.getElementById("paletteSwatches");g.innerHTML="";
+  (PALETTES[S.paletteCat]||[]).forEach(item=>{
+    const d=document.createElement("div");
+    d.className="pal-sw"+(item.c===S.c1?" on":"");
+    d.style.background=item.c;
+    d.onclick=()=>{
+      S.c1=item.c;document.getElementById("c1pick").value=item.c;
+      document.querySelectorAll(".pal-sw").forEach(s=>s.classList.remove("on"));d.classList.add("on");
+      renderAll();
+    };
+    g.appendChild(d);
+  });
+}
+
+function buildPills(id,arr,key){
+  const g=document.getElementById(id);
+  arr.forEach((item,i)=>{
+    const d=document.createElement("div");
+    d.className="pill"+(S[key]===i?" on":"");
+    d.textContent=item.l;
+    d.onclick=()=>{S[key]=i;document.querySelectorAll("#"+id+" .pill").forEach((el,j)=>el.classList.toggle("on",j===i));renderAll();};
+    g.appendChild(d);
+  });
+}
+
+function buildWebSecs(){
+  const g=document.getElementById("webSections");
+  WEB_SECS_LIST.forEach((lbl,i)=>{
+    const k=WEB_SECS_KEYS[i];
+    const row=document.createElement("div");row.className="toggle-row";
+    const tog=document.createElement("div");tog.className="toggle"+(S.webSecs[k]?" on":"");
+    tog.onclick=()=>{S.webSecs[k]=!S.webSecs[k];tog.classList.toggle("on",S.webSecs[k]);renderAll();};
+    row.innerHTML=`<span class="toggle-lbl">${lbl}</span>`;row.appendChild(tog);
+    g.appendChild(row);
+  });
+}
+
+function setQR(type,el){
+  S.qrType=type;
+  document.querySelectorAll(".qr-pill").forEach(p=>p.classList.remove("on"));el.classList.add("on");
+  const lbls={wa:"Mensaje de WhatsApp",perfil:"URL de perfil o web",vcard:"Número para guardar contacto"};
+  document.getElementById("qrLbl").textContent=lbls[type];
+  renderAll();
+}
+
+function setTxt(v,el){
+  S.txt=v;
+  document.getElementById("txtW").classList.toggle("on",v==="white");
+  document.getElementById("txtD").classList.toggle("on",v==="dark");
+  renderAll();
+}
+
+function setMode(m,el){
+  S.mode=m;
+  document.querySelectorAll(".mode-tab").forEach(t=>t.classList.remove("on"));el.classList.add("on");
+  ["viewCard","viewWeb","viewBoth"].forEach(id=>document.getElementById(id).classList.remove("show"));
+  document.getElementById({card:"viewCard",web:"viewWeb",both:"viewBoth"}[m]).classList.add("show");
+  renderAll();
+}
+
+function aleatorio(){
+  S.profIdx=Math.floor(Math.random()*PROFS.length);
+  const p=PROFS[S.profIdx];S.iconEmoji=p.e;
+  S.bgStyle=Math.floor(Math.random()*BG_STYLES.length);
+  S.heroStyle=Math.floor(Math.random()*HERO_STYLES.length);
+  S.foto=Math.floor(Math.random()*FOTO_OPTS.length);
+  S.qrPos=Math.floor(Math.random()*QR_POS.length);
+  S.font=Math.floor(Math.random()*FONTS.length);
+  S.wm=Math.floor(Math.random()*WM_OPTS.length);
+  S.qrStyle=QR_STYLES_LIST[Math.floor(Math.random()*QR_STYLES_LIST.length)].v;
+  S.txt=Math.random()>.4?"white":"dark";
+  const cats=Object.keys(PALETTES);
+  S.paletteCat=cats[Math.floor(Math.random()*cats.length)];
+  const pal=PALETTES[S.paletteCat];
+  S.c1=pal[Math.floor(Math.random()*pal.length)].c;
+  S.c2=pal[Math.floor(Math.random()*pal.length)].c;
+  document.getElementById("c1pick").value=S.c1;
+  document.getElementById("c2pick").value=S.c2;
+  document.getElementById("fNombre").value=p.n+" Pro";
+  document.getElementById("fEslogan").value=p.s;
+  document.querySelectorAll(".prof-item").forEach((el,j)=>el.classList.toggle("on",j===S.profIdx));
+  buildPaletteCats();buildPaletteSwatches();syncIconGrid();
+  ["bgStylePills","fotoPills","qrPosPills","fontPills","wmPills","heroStylePills"].forEach((id,ki)=>{
+    const keys=["bgStyle","foto","qrPos","font","wm","heroStyle"];
+    document.querySelectorAll("#"+id+" .pill").forEach((el,j)=>el.classList.toggle("on",j===S[keys[ki]]));
+  });
+  document.getElementById("txtW").classList.toggle("on",S.txt==="white");
+  document.getElementById("txtD").classList.toggle("on",S.txt==="dark");
+  document.querySelectorAll(".qr-style-item").forEach((el,j)=>el.classList.toggle("on",QR_STYLES_LIST[j]?.v===S.qrStyle));
+  renderAll();
+}
+
+function copiarQRLink(){
+  const url=S.qrURL||buildQRContent();
+  navigator.clipboard&&navigator.clipboard.writeText(url).then(()=>status("st1","✅ Link copiado"));
+}
+
+function enviarWA(){
+  const wa=document.getElementById("fWa").value.replace(/\D/g,"");
+  const nombre=document.getElementById("fNombre").value;
+  window.open(`https://wa.me/${wa}?text=${enc("Hola "+nombre+"! Tu tarjeta digital y página web están listas 🎉 Te las comparto ahora.")}`, "_blank");
+}
+
+function descargarHTML(){
+  const nombre=document.getElementById("fNombre").value||"cliente";
+  const empresa=document.getElementById("fEmpresa").value||"Empresa";
+  const c1=S.c1,c2=S.c2;
+  const tc=S.txt==="white"?"#ffffff":"#111111";
+  const a2=(hex,a)=>{const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return`rgba(${r},${g},${b},${a})`};
+  const waVal=document.getElementById("fWa").value;
+  const emailVal=document.getElementById("fEmail").value;
+  const webVal=document.getElementById("fWeb").value;
+  const igVal=document.getElementById("fIg").value;
+  const eslogan=document.getElementById("fEslogan").value;
+  const desc=document.getElementById("fDesc").value;
+  const svcs=document.getElementById("fSvcs").value.split(",").map(s=>s.trim()).filter(Boolean);
+  const profNombre=getActiveProfName();
+  const emoji=getActiveEmoji();
+  const fotoTag=S.fotoSrc&&S.fotoMode!=="none"?`<img src="${S.fotoSrc}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:`<span style="font-size:32px">${emoji}</span>`;
+  const logoTag=S.logoSrc&&S.logoMode!=="none"?`<div style="width:50px;height:50px;border-radius:8px;overflow:hidden;background:rgba(255,255,255,.2);margin:0 auto 8px;display:flex;align-items:center;justify-content:center"><img src="${S.logoSrc}" style="width:100%;height:100%;object-fit:contain"></div>`:"";
+
+  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${nombre}</title>
+<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;background:#f5f5f5;min-height:100vh;display:flex;justify-content:center;padding:20px 10px}.card{max-width:420px;width:100%;border-radius:18px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.15);background:#fff}.hero{background:${c1};padding:28px 20px 22px;text-align:center}.ava{width:80px;height:80px;border-radius:50%;margin:0 auto 12px;border:3px solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;overflow:hidden;background:${a2(c2,.3)}}.name{font-size:22px;font-weight:700;color:${tc};margin-bottom:4px}.prof{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:${tc};opacity:.8;margin-bottom:6px}.tag{font-size:13px;font-style:italic;color:${tc};opacity:.75}.accent{height:5px;background:${c2}}.body{padding:16px}.sec{background:${a2(c2,.15)};border-radius:10px;padding:14px;margin-bottom:12px}.st{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:${c1};margin-bottom:10px;opacity:.75}.svcs{display:grid;grid-template-columns:1fr 1fr;gap:6px}.svc{background:${c1};color:#fff;border-radius:7px;padding:7px 10px;font-size:12px;font-weight:600;text-align:center}.gal{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}.gi{background:${a2(c1,.12)};border-radius:8px;height:60px;display:flex;align-items:center;justify-content:center;font-size:11px;color:${c1};font-weight:600}.crow{display:flex;align-items:center;gap:10px;margin-bottom:8px;text-decoration:none;color:#333}.ci{width:32px;height:32px;border-radius:50%;background:${c1};display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-size:15px}.foot{background:${c1};color:rgba(255,255,255,.65);text-align:center;padding:10px;font-size:10px}a{text-decoration:none}</style></head>
+<body><div class="card">
+<div class="hero"><div class="ava">${fotoTag}</div>${logoTag}<div class="name">${nombre}</div><div class="prof">${profNombre}</div><div class="tag">${eslogan}</div></div>
+<div class="accent"></div><div class="body">
+${desc?`<div class="sec"><div class="st">Sobre mí</div><p style="font-size:13px;color:#333;line-height:1.7">${desc}</p></div>`:""}
+${svcs.length?`<div class="sec"><div class="st">Servicios</div><div class="svcs">${svcs.map(s=>`<div class="svc">${s}</div>`).join("")}</div></div>`:""}
+<div class="sec"><div class="st">Galería</div><div class="gal">${[1,2,3,4,5,6].map(i=>`<div class="gi">Foto ${i}</div>`).join("")}</div></div>
+<div class="sec"><div class="st">Contacto</div>
+<a class="crow" href="tel:${waVal}"><div class="ci">📞</div>${waVal}</a>
+<a class="crow" href="mailto:${emailVal}"><div class="ci">✉️</div>${emailVal}</a>
+<a class="crow" href="https://instagram.com/${igVal.replace("@","")}"><div class="ci">📷</div>${igVal}</a>
+<a class="crow" href="https://wa.me/${waVal.replace(/\D/g,"")}"><div class="ci">💬</div>WhatsApp</a>
+<a class="crow" href="https://${webVal}"><div class="ci">🌐</div>${webVal}</a>
+</div></div>
+<div class="foot">${empresa}</div>
+</div></body></html>`;
+
+  const blob=new Blob([html],{type:"text/html;charset=utf-8"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=nombre.replace(/\s+/g,"_")+"_web.html";
+  a.click();
+  status("st2","✅ Página web descargada");
+  status("st3","✅ Página web descargada");
+}
+
+function instruccionesSites(){
+  alert("CÓMO SUBIR A GOOGLE SITES:\n\n1. Ve a sites.google.com\n2. Crea un sitio nuevo con el nombre del cliente\n3. Agrega nombre, foto y secciones\n4. Inserta el HTML: Insertar → HTML incrustado\n5. Publica el sitio (botón Publicar)\n6. Copia el link y envíalo por WhatsApp al cliente");
+}
+
+/* ══ INIT ══ */
+// Pre-fill sheet ID
+buildGradientGallery();
+buildProfGrid();
+buildIconGrid();
+buildQRStyleGrid();
+buildPaletteCats();
+buildPaletteSwatches();
+buildPills("bgStylePills",BG_STYLES,"bgStyle");
+buildPills("fotoPills",FOTO_OPTS,"foto");
+buildPills("qrPosPills",QR_POS,"qrPos");
+buildPills("fontPills",FONTS,"font");
+buildPills("wmPills",WM_OPTS,"wm");
+buildPills("heroStylePills",HERO_STYLES,"heroStyle");
+buildWebSecs();
+updatePreviews();
+renderAll();
+</script>
+</body>
+</html>
